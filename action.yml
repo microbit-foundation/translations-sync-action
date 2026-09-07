@@ -1,0 +1,88 @@
+# (c) 2026, Micro:bit Educational Foundation and contributors
+# SPDX-License-Identifier: MIT
+name: Translations sync
+description:
+  Run the repository's translation download and open or refresh a pull
+  request with the result. Pushes with the microbit-i18n GitHub App so the
+  pull request gets CI, which pushes made with GITHUB_TOKEN never do.
+author: Micro:bit Educational Foundation
+inputs:
+  download:
+    description:
+      Command that downloads the translations, run from the repository root
+      with I18N_SUMMARY set to a file for its Markdown summary. Exit 0 for
+      success, 2 when some files failed but the rest were written, anything
+      else to stop before the pull request.
+    required: true
+  post-download:
+    description:
+      Command run after a download that exited 0 or 2, for repositories that
+      derive other files from the downloaded ones.
+    required: false
+    default: ""
+  app-id:
+    description: The microbit-i18n GitHub App's id.
+    required: true
+  private-key:
+    description: The microbit-i18n GitHub App's private key.
+    required: true
+  branch:
+    description: Branch the changes are force-pushed to.
+    required: false
+    default: translations/sync
+  base:
+    description: Branch the pull request targets.
+    required: false
+    default: ${{ github.event.repository.default_branch }}
+  title:
+    description: Commit message and pull request title.
+    required: false
+    default: Translation sync
+  body:
+    description:
+      First paragraph of the pull request body. The download summary follows
+      it.
+    required: false
+    default: Translations downloaded from Crowdin by the translations-download
+      workflow. Review, then merge; the branch is force-pushed on each run.
+  reviewer:
+    description: Team or user to request a review from; empty for none.
+    required: false
+    default: microbit-foundation/web
+outputs:
+  status:
+    description: The download command's exit code.
+    value: ${{ steps.download.outputs.status }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+      id: token
+      with:
+        app-id: ${{ inputs.app-id }}
+        private-key: ${{ inputs.private-key }}
+        permission-contents: write
+        permission-pull-requests: write
+    - id: download
+      shell: bash
+      env:
+        DOWNLOAD: ${{ inputs.download }}
+        POST_DOWNLOAD: ${{ inputs.post-download }}
+        I18N_SUMMARY: ${{ runner.temp }}/translation-summary.md
+      run: "${GITHUB_ACTION_PATH}/scripts/download.sh"
+    - shell: bash
+      env:
+        GH_TOKEN: ${{ steps.token.outputs.token }}
+        APP_SLUG: ${{ steps.token.outputs.app-slug }}
+        BRANCH: ${{ inputs.branch }}
+        BASE: ${{ inputs.base }}
+        TITLE: ${{ inputs.title }}
+        BODY: ${{ inputs.body }}
+        REVIEWER: ${{ inputs.reviewer }}
+        I18N_SUMMARY: ${{ runner.temp }}/translation-summary.md
+      run: "${GITHUB_ACTION_PATH}/scripts/pull-request.sh"
+    - if: steps.download.outputs.status == '2'
+      shell: bash
+      run: |
+        echo "::error::Some translations failed to download; see the download step. The pull request holds the rest."
+        exit 1

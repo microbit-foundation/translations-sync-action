@@ -21,10 +21,13 @@ git config user.email "${bot_id}+${bot}@users.noreply.github.com"
 git checkout -B "${BRANCH}"
 git commit -m "${TITLE}"
 
-# actions/checkout leaves GITHUB_TOKEN in an extraheader that git would send
-# alongside the App token; a push under GITHUB_TOKEN starts no workflows.
-git config --local --unset-all http.https://github.com/.extraheader || true
-git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "${BRANCH}"
+# actions/checkout leaves GITHUB_TOKEN in an http.extraheader, which git
+# would send in preference to the token in the URL, and a push under
+# GITHUB_TOKEN starts no workflows. Recent checkouts keep that header in an
+# included file rather than .git/config, so it cannot be unset in place; an
+# empty value on the command line resets the header list wherever it lives.
+git -c "http.${GITHUB_SERVER_URL}/.extraheader=" push --force \
+  "${GITHUB_SERVER_URL/:\/\//://x-access-token:${GH_TOKEN}@}/${GITHUB_REPOSITORY}.git" "${BRANCH}"
 
 body_file="${RUNNER_TEMP}/pr-body.md"
 {

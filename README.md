@@ -51,17 +51,17 @@ the action step. Everything before it is the repository's own install.
 
 ## Inputs
 
-| Input           | Default                                       | Purpose                                                                                      |
-| --------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `download`      | required                                      | Command that downloads the translations, run from the repository root.                       |
-| `post-download` | none                                          | Command run after a download that exited 0 or 2, for repositories that derive files from it. |
-| `app-id`        | required                                      | The microbit-i18n App's id.                                                                  |
-| `private-key`   | required                                      | The microbit-i18n App's private key.                                                         |
-| `branch`        | `translations/sync`                           | Branch the changes are force-pushed to.                                                      |
-| `base`          | the default branch                            | Branch the pull request targets.                                                             |
-| `title`         | `Translation sync`                            | Commit message and pull request title.                                                       |
-| `body`          | a sentence saying where the changes came from | First paragraph of the pull request body; the download summary follows it.                   |
-| `reviewer`      | `microbit-foundation/web`                     | Team or user to request a review from; empty for none.                                       |
+| Input           | Default                                       | Purpose                                                                                              |
+| --------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `download`      | required                                      | Command that downloads the translations, run from the repository root.                               |
+| `post-download` | none                                          | Command run after a download that exited 0 or 2, for repositories that derive files from it.         |
+| `app-id`        | required                                      | The microbit-i18n App's id.                                                                          |
+| `private-key`   | required                                      | The microbit-i18n App's private key.                                                                 |
+| `branch`        | `translations/sync`                           | Branch the changes are force-pushed to.                                                              |
+| `base`          | the default branch                            | Branch the pull request targets.                                                                     |
+| `title`         | `Translation sync`                            | Commit message and pull request title.                                                               |
+| `body`          | a sentence saying where the changes came from | First paragraph of the pull request body; the download summary follows it.                           |
+| `reviewer`      | `microbit-foundation/web`                     | Team (`org/slug`) or user to request a review from when the pull request is created; empty for none. |
 
 The pull request body and the run's step summary both carry the download's
 summary: files written, failed downloads, and translations left out for

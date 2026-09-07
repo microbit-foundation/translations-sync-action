@@ -76,7 +76,8 @@ generated output that should not be committed must be gitignored.
 
 - The `microbit-i18n` GitHub App installed on the repository, with its id and
   private key available as secrets. Its setup, and why it is a separate App
-  from Renovate's, is in the `@microbit/i18n-tools` README.
+  from Renovate's, is in the `@microbit/i18n-tools` README. Requesting a team
+  review needs the App's organisation Members permission (read-only).
 - A checkout with the default credentials is fine: the push uses the App
   token explicitly and drops the checkout's `GITHUB_TOKEN` header first.
 - `@microbit/i18n-tools` 0.1.2 or later, for `I18N_SUMMARY`.

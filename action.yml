@@ -63,6 +63,8 @@ runs:
         private-key: ${{ inputs.private-key }}
         permission-contents: write
         permission-pull-requests: write
+        # Organisation permission: resolving the reviewer team needs it.
+        permission-members: read
     - id: download
       shell: bash
       env:

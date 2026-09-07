@@ -42,18 +42,10 @@ if gh pr view "${BRANCH}" --json state --jq .state 2>/dev/null | grep -q OPEN; t
   gh pr edit "${BRANCH}" --body-file "${body_file}"
   echo "Updated the open pull request."
 else
-  gh pr create --base "${BASE}" --head "${BRANCH}" --title "${TITLE}" --body-file "${body_file}"
+  reviewer_args=()
   if [ -n "${REVIEWER}" ]; then
-    # Through the REST endpoint, which takes a team slug and needs only
-    # pull-request write. gh's --reviewer resolves the team first, which
-    # needs organisation Members read that the App token does not carry.
-    number=$(gh pr view "${BRANCH}" --json number --jq .number)
-    if [[ "${REVIEWER}" == */* ]]; then
-      field="team_reviewers[]=${REVIEWER#*/}"
-    else
-      field="reviewers[]=${REVIEWER}"
-    fi
-    gh api -X POST "repos/${GITHUB_REPOSITORY}/pulls/${number}/requested_reviewers" \
-      -f "${field}" --silent
+    reviewer_args=(--reviewer "${REVIEWER}")
   fi
+  gh pr create --base "${BASE}" --head "${BRANCH}" --title "${TITLE}" \
+    "${reviewer_args[@]}" --body-file "${body_file}"
 fi
